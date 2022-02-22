@@ -23,3 +23,52 @@ class AppImage(models.Model):
 class User(AbstractUser):
     phone_number = models.CharField(max_length=191, blank=True, null=True, verbose_name="手机号码", unique=True)
     avatar = models.ForeignKey(AppImage, on_delete=models.SET_NULL, db_constraint=False, null=True, blank=True)
+
+
+class Project(models.Model):
+    name = models.CharField(max_length=191, verbose_name='名称')
+    person = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='负责人')
+    organization = models.CharField(max_length=191, verbose_name='部门')
+
+    create_at = models.DateTimeField(auto_now_add=True)
+    update_at = models.DateTimeField(auto_now=True)
+
+
+class ProjectUserSetting(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='+')
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='+')
+    is_pinned = models.BooleanField(verbose_name='是否收藏')
+
+    create_at = models.DateTimeField(auto_now_add=True)
+    update_at = models.DateTimeField(auto_now=True)
+
+
+class Epic(models.Model):
+    name = models.CharField(max_length=191)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='epics')
+    start = models.DateTimeField(verbose_name='开始时间')
+    end = models.DateTimeField(verbose_name='结束时间')
+
+    create_at = models.DateTimeField(auto_now_add=True)
+    update_at = models.DateTimeField(auto_now=True)
+
+
+class Kanban(models.Model):
+    name = models.CharField(max_length=191)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='epics')
+
+    create_at = models.DateTimeField(auto_now_add=True)
+    update_at = models.DateTimeField(auto_now=True)
+
+
+class Task(models.Model):
+    name = models.CharField(max_length=191, verbose_name='名称')
+    processor = models.ForeignKey(User, verbose_name='经办人', blank=True, null=True, on_delete=models.SET_NULL, related_name='tasks')
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='tasks')
+    epic = models.ForeignKey(Epic, on_delete=models.SET_NULL, blank=True, null=True, related_name='tasks')
+    kanban = models.ForeignKey(Kanban, on_delete=models.SET_NULL, blank=True, null=True, related_name='tasks')
+    type_id = models.IntegerField(verbose_name='类型ID')
+    note = models.TextField(verbose_name='说明')
+
+    create_at = models.DateTimeField(auto_now_add=True)
+    update_at = models.DateTimeField(auto_now=True)

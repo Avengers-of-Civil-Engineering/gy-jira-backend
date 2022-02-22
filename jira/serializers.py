@@ -1,5 +1,5 @@
 from rest_framework import serializers, exceptions
-from .models import AppImage, User
+from .models import AppImage, User, Project, ProjectUserSetting
 
 
 class AppImageSerializer(serializers.ModelSerializer):
@@ -74,4 +74,39 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = (
             'id',
             'avatar',
+        )
+
+
+class ProjectSerializer(serializers.ModelSerializer):
+    pin = serializers.SerializerMethodField()
+
+    def get_pin(self, obj: Project):
+        request = self.context.get('request')
+        if request is None:
+            return None
+        user: User = request.user
+        if user.is_anonymous:
+            return None
+        project_user_setting = ProjectUserSetting.objects.filter(user=user, project=obj).first()
+        if project_user_setting is None:
+            return None
+        return project_user_setting.is_pinned
+
+    class Meta:
+        model = Project
+        fields = (
+            'id',
+            'person_id',
+            'person',
+            'organization',
+            'pin',
+            'create_at',
+            'update_at',
+        )
+        read_only_fields = (
+            'id',
+            'person',
+            'pin',
+            'create_at',
+            'update_at',
         )

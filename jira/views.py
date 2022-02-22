@@ -12,12 +12,15 @@ from rest_framework import exceptions
 
 from .models import (
     User,
-    AppImage
+    AppImage,
+    Project,
+    ProjectUserSetting,
 )
 
 from .serializers import (
     UserSerializer,
     AppImageSerializer,
+    ProjectSerializer,
 )
 
 
@@ -84,3 +87,43 @@ class MyObtainAuthTokenAPI(ObtainAuthToken):
             'token': token.key,
             'user': UserSerializer(instance=user, context={'request': request}).data,
         })
+
+
+class ProjectViewSet(ModelViewSet):
+    authentication_classes = (
+        authentication.SessionAuthentication,
+        authentication.TokenAuthentication,
+    )
+    permission_classes = (
+        permissions.IsAuthenticated,
+    )
+
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+
+    @action(methods=['POST', ], detail=True, url_path="toggle-pin")
+    def toggle_pin(self, request: Request, **kwargs):
+        project: Project = self.get_object()
+        user: User = request.user
+        new_val = None
+        try:
+            new_val = int(request.data.get('newVal'))
+        except Exception:
+            pass
+        if new_val not in (0, 1):
+            raise exceptions.ValidationError({'newVal': 'should be 0 or 1'})
+
+        project_user = ProjectUserSetting.objects.filter(project=project, user=user).first()
+        if project_user is None:
+            project_user = ProjectUserSetting(
+                project=project,
+                user=user,
+                is_pinned=(new_val == 1)
+            )
+        else:
+            project_user.is_pinned = (new_val == 1)
+        project_user.save()
+
+        serializer = ProjectSerializer(instance=project, context=self.get_serializer_context())
+
+        return Response(serializer.data)
