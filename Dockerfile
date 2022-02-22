@@ -24,7 +24,9 @@ RUN apt-get update -y && apt-get -y install default-libmysqlclient-dev gcc && \
       six==1.16.0 \
       sqlparse==0.4.2 \
       urllib3==1.26.8 \
-      whitenoise==5.3.0
+      whitenoise==5.3.0 \
+      mysqlclient==2.1.0 \
+      Pillow==8.4.0
 
 
 WORKDIR /app/gy-jira-backend
