@@ -171,9 +171,10 @@ class TaskSerializer(serializers.ModelSerializer):
     kanban = KanbanSerializer(read_only=True)
 
     project_id = serializers.IntegerField(label='项目ID')
-    processor_id = serializers.IntegerField(label='经办人ID', required=False)
-    epic_id = serializers.IntegerField(label='史诗ID', required=False)
-    kanban_id = serializers.IntegerField(label='看板ID', required=False)
+    processor_id = serializers.IntegerField(label='经办人ID', required=False, allow_null=True)
+    epic_id = serializers.IntegerField(label='史诗ID', required=False, allow_null=True)
+    kanban_id = serializers.IntegerField(label='看板ID', required=False, allow_null=True)
+    type_id = serializers.IntegerField(label="类型ID", default=1)
 
     class Meta:
         model = Task
