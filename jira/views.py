@@ -33,7 +33,7 @@ class AllowPostByAnyOne(permissions.BasePermission):
             return bool(request.user and request.user.is_authenticated)
 
 
-class UserViewSet(mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, GenericViewSet):
+class UserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, GenericViewSet):
     authentication_classes = (
         authentication.SessionAuthentication,
         authentication.TokenAuthentication,
