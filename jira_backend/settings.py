@@ -64,6 +64,9 @@ DATABASES = {
     'default': env.db("DATABASE_URL")
 }
 
+if not DEBUG:
+    DATABASES['default']['CONN_MAX_AGE'] = 60
+
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
