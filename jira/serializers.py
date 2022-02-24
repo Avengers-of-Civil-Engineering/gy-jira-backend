@@ -121,6 +121,7 @@ class ProjectTogglePinSerializer(serializers.Serializer):
 
 class EpicSerializer(serializers.ModelSerializer):
     project = ProjectSerializer(read_only=True)
+    project_id = serializers.IntegerField(label='项目ID')
 
     class Meta:
         model = Epic
@@ -143,6 +144,8 @@ class EpicSerializer(serializers.ModelSerializer):
 
 
 class KanbanSerializer(serializers.ModelSerializer):
+    project_id = serializers.IntegerField(label='项目ID')
+
     class Meta:
         model = Kanban
         fields = (
@@ -166,6 +169,11 @@ class TaskSerializer(serializers.ModelSerializer):
     project = ProjectSerializer(read_only=True)
     epic = EpicSerializer(read_only=True)
     kanban = KanbanSerializer(read_only=True)
+
+    processor_id = serializers.IntegerField(label='经办人ID')
+    project_id = serializers.IntegerField(label='项目ID')
+    epic_id = serializers.IntegerField(label='史诗ID')
+    kanban_id = serializers.IntegerField(label='看板ID')
 
     class Meta:
         model = Task
