@@ -33,6 +33,9 @@ class Project(models.Model):
     create_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        verbose_name = verbose_name_plural = '项目'
+
 
 class ProjectUserSetting(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='+')
@@ -41,6 +44,9 @@ class ProjectUserSetting(models.Model):
 
     create_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = verbose_name_plural = '项目用户设置'
 
 
 class Epic(models.Model):
@@ -52,6 +58,9 @@ class Epic(models.Model):
     create_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        verbose_name = verbose_name_plural = '史诗'
+
 
 class Kanban(models.Model):
     name = models.CharField(max_length=191)
@@ -59,6 +68,9 @@ class Kanban(models.Model):
     rank = models.IntegerField(verbose_name='排序参考值', default=0)
     create_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = verbose_name_plural = '看板'
 
 
 class Task(models.Model):
@@ -72,3 +84,6 @@ class Task(models.Model):
 
     create_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = verbose_name_plural = '任务'
