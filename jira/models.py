@@ -55,8 +55,8 @@ class Epic(models.Model):
 
 class Kanban(models.Model):
     name = models.CharField(max_length=191)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='epics')
-
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='kanbans')
+    rank = models.IntegerField(verbose_name='排序参考值', default=0)
     create_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
 
@@ -68,7 +68,7 @@ class Task(models.Model):
     epic = models.ForeignKey(Epic, on_delete=models.SET_NULL, blank=True, null=True, related_name='tasks')
     kanban = models.ForeignKey(Kanban, on_delete=models.SET_NULL, blank=True, null=True, related_name='tasks')
     type_id = models.IntegerField(verbose_name='类型ID')
-    note = models.TextField(verbose_name='说明')
+    note = models.TextField(verbose_name='说明', blank=True, null=False)
 
     create_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)

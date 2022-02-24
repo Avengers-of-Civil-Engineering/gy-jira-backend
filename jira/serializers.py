@@ -1,5 +1,5 @@
 from rest_framework import serializers, exceptions
-from .models import AppImage, User, Project, ProjectUserSetting
+from .models import AppImage, User, Project, ProjectUserSetting, Epic, Kanban, Task
 
 
 class AppImageSerializer(serializers.ModelSerializer):
@@ -78,6 +78,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class ProjectSerializer(serializers.ModelSerializer):
+    person = UserSerializer(read_only=True)
+    person_id = serializers.IntegerField(label='负责人ID')
     pin = serializers.SerializerMethodField()
 
     def get_pin(self, obj: Project):
@@ -96,6 +98,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         model = Project
         fields = (
             'id',
+            'name',
             'person_id',
             'person',
             'organization',
@@ -107,6 +110,87 @@ class ProjectSerializer(serializers.ModelSerializer):
             'id',
             'person',
             'pin',
+            'create_at',
+            'update_at',
+        )
+
+
+class ProjectTogglePinSerializer(serializers.Serializer):
+    new_val = serializers.BooleanField(label='是否收藏')
+
+
+class EpicSerializer(serializers.ModelSerializer):
+    project = ProjectSerializer(read_only=True)
+
+    class Meta:
+        model = Epic
+        fields = (
+            'id',
+            'name',
+            'project_id',
+            'project',
+            'start',
+            'end',
+            'create_at',
+            'update_at'
+        )
+        read_only_fields = (
+            'id',
+            'project',
+            'create_at',
+            'update_at'
+        )
+
+
+class KanbanSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Kanban
+        fields = (
+            'id',
+            'name',
+            'project_id',
+            'rank',
+            'create_at',
+            'update_at'
+        )
+        read_only_fields = (
+            'id',
+            'project_id',
+            'create_at',
+            'update_at',
+        )
+
+
+class TaskSerializer(serializers.ModelSerializer):
+    processor = UserSerializer(read_only=True)
+    project = ProjectSerializer(read_only=True)
+    epic = EpicSerializer(read_only=True)
+    kanban = KanbanSerializer(read_only=True)
+
+    class Meta:
+        model = Task
+        fields = (
+            'id',
+            'name',
+            'processor_id',
+            'processor',
+            'project_id',
+            'project',
+            'epic_id',
+            'epic',
+            'kanban_id',
+            'kanban',
+            'type_id',
+            'note',
+            'create_at',
+            'update_at',
+        )
+        read_only_fields = (
+            'id',
+            'processor',
+            'project',
+            'epic',
+            'kanban',
             'create_at',
             'update_at',
         )

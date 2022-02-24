@@ -1,26 +1,27 @@
 from rest_framework import authentication
+from rest_framework import exceptions
+from rest_framework import mixins
 from rest_framework import permissions
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
-from rest_framework import mixins
-from rest_framework import exceptions
 
 from .models import (
     User,
     AppImage,
     Project,
-    ProjectUserSetting,
+    ProjectUserSetting, Epic, Kanban, Task,
 )
-
 from .serializers import (
     UserSerializer,
     AppImageSerializer,
     ProjectSerializer,
+    EpicSerializer,
+    KanbanSerializer,
+    TaskSerializer, ProjectTogglePinSerializer
 )
 
 
@@ -69,7 +70,7 @@ class AppImageViewSet(mixins.RetrieveModelMixin, mixins.CreateModelMixin, Generi
         authentication.TokenAuthentication,
     )
     permission_classes = (
-        permissions.IsAuthenticated,
+        permissions.IsAuthenticatedOrReadOnly,
     )
 
     queryset = AppImage.objects.all()
@@ -95,35 +96,75 @@ class ProjectViewSet(ModelViewSet):
         authentication.TokenAuthentication,
     )
     permission_classes = (
-        permissions.IsAuthenticated,
+        permissions.IsAuthenticatedOrReadOnly,
     )
 
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
 
+    def get_serializer_class(self):
+        if self.action == 'toggle_pin':
+            return ProjectTogglePinSerializer
+        return super().get_serializer_class()
+
     @action(methods=['POST', ], detail=True, url_path="toggle-pin")
     def toggle_pin(self, request: Request, **kwargs):
         project: Project = self.get_object()
         user: User = request.user
-        new_val = None
-        try:
-            new_val = int(request.data.get('newVal'))
-        except Exception:
-            pass
-        if new_val not in (0, 1):
-            raise exceptions.ValidationError({'newVal': 'should be 0 or 1'})
 
-        project_user = ProjectUserSetting.objects.filter(project=project, user=user).first()
-        if project_user is None:
-            project_user = ProjectUserSetting(
-                project=project,
-                user=user,
-                is_pinned=(new_val == 1)
-            )
-        else:
-            project_user.is_pinned = (new_val == 1)
-        project_user.save()
+        req_serializer: ProjectTogglePinSerializer = self.get_serializer(data=request.data)
+        if req_serializer.is_valid(raise_exception=True):
+            new_val = req_serializer.validated_data['new_val']
+            project_user = ProjectUserSetting.objects.filter(project=project, user=user).first()
+            if project_user is None:
+                project_user = ProjectUserSetting(
+                    project=project,
+                    user=user,
+                    is_pinned=new_val
+                )
+            else:
+                project_user.is_pinned = new_val
+            project_user.save()
 
-        serializer = ProjectSerializer(instance=project, context=self.get_serializer_context())
+            serializer = ProjectSerializer(instance=project, context=self.get_serializer_context())
 
-        return Response(serializer.data)
+            return Response(serializer.data)
+
+
+class EpicViewSet(ModelViewSet):
+    authentication_classes = (
+        authentication.SessionAuthentication,
+        authentication.TokenAuthentication,
+    )
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly,
+    )
+
+    queryset = Epic.objects.all()
+    serializer_class = EpicSerializer
+
+
+class KanbanViewSet(ModelViewSet):
+    authentication_classes = (
+        authentication.SessionAuthentication,
+        authentication.TokenAuthentication,
+    )
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly,
+    )
+
+    queryset = Kanban.objects.all()
+    serializer_class = KanbanSerializer
+
+
+class TaskViewSet(ModelViewSet):
+    authentication_classes = (
+        authentication.SessionAuthentication,
+        authentication.TokenAuthentication,
+    )
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly,
+    )
+
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
