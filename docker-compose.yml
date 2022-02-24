@@ -5,7 +5,7 @@ services:
     image: 'ccr.ccs.tencentyun.com/aweffr-main/gy-jira-backend:0.1'
     restart: always
     volumes:
-      - './jira_backend/.env:/app/gy-jira-backend/gymall/.env:ro'
+      - './jira_backend/.env:/app/gy-jira-backend/jira_backend/.env:ro'
       - './logs:/app/gy-jira-backend/logs'
       - './media:/app/gy-jira-backend/media'
       - './static:/app/gy-jira-backend/static'

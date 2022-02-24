@@ -45,7 +45,7 @@ def run_collectstatic():
 
 def run_server():
     worker_num = 2 * multiprocessing.cpu_count() + 1
-    cmd = f"gunicorn gymall.wsgi -w {worker_num} -b 0.0.0.0:8000 -k gthread --threads 8"
+    cmd = f"gunicorn jira_backend.wsgi -w {worker_num} -b 0.0.0.0:8000 -k gthread --threads 8"
     print("call cmd:", cmd, file=sys.stderr)
     subprocess.call(cmd, shell=True)
 
