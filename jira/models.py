@@ -33,6 +33,9 @@ class Project(models.Model):
     create_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         verbose_name = verbose_name_plural = '项目'
 
@@ -58,8 +61,11 @@ class Epic(models.Model):
     create_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return self.name
+
     class Meta:
-        verbose_name = verbose_name_plural = '史诗'
+        verbose_name = verbose_name_plural = '任务组'
 
 
 class Kanban(models.Model):
@@ -68,6 +74,9 @@ class Kanban(models.Model):
     rank = models.IntegerField(verbose_name='排序参考值', default=0)
     create_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         verbose_name = verbose_name_plural = '看板'
@@ -84,6 +93,9 @@ class Task(models.Model):
 
     create_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         verbose_name = verbose_name_plural = '任务'

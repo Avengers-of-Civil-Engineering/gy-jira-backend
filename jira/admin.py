@@ -20,19 +20,21 @@ class ProjectAdmin(admin.ModelAdmin):
 
 @admin.register(Kanban)
 class KanbanAdmin(admin.ModelAdmin):
-    pass
+    list_filter = ('project',)
+    list_display = ('project', 'name', 'rank', 'update_at')
 
 
 @admin.register(Epic)
 class EpicAdmin(admin.ModelAdmin):
-    pass
+    list_filter = ('project',)
 
 
 @admin.register(ProjectUserSetting)
 class ProjectUserSettingAdmin(admin.ModelAdmin):
-    pass
+    list_filter = ('project', 'user')
+    list_display = ('project', 'user', 'is_pinned')
 
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    pass
+    list_filter = ('project',)
