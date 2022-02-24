@@ -9,7 +9,7 @@ router.register(r'users', views.UserViewSet)
 router.register(r'images', views.AppImageViewSet)
 router.register(r'projects', views.ProjectViewSet)
 router.register(r'epics', views.EpicViewSet)
-router.register(r'kanban', views.KanbanViewSet)
+router.register(r'kanbans', views.KanbanViewSet)
 router.register(r'tasks', views.TaskViewSet)
 
 pprint(router.get_urls())

@@ -166,5 +166,5 @@ class TaskViewSet(ModelViewSet):
         permissions.IsAuthenticatedOrReadOnly,
     )
 
-    queryset = Task.objects.all()
+    queryset = Task.objects.select_related('project', 'project__person', 'epic', 'epic__project', 'kanban').all()
     serializer_class = TaskSerializer
