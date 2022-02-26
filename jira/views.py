@@ -8,6 +8,7 @@ from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
+from django_filters import rest_framework as filters
 
 from .models import (
     User,
@@ -90,6 +91,18 @@ class MyObtainAuthTokenAPI(ObtainAuthToken):
         })
 
 
+class ProjectFilter(filters.FilterSet):
+    createAtMin = filters.DateTimeFilter(field_name='create_at', lookup_expr='gte')
+    createAtMax = filters.DateTimeFilter(field_name='create_at', lookup_expr='lte')
+
+    class Meta:
+        model = Project
+        fields = (
+            'person',
+            'organization',
+        )
+
+
 class ProjectViewSet(ModelViewSet):
     authentication_classes = (
         authentication.SessionAuthentication,
@@ -98,6 +111,7 @@ class ProjectViewSet(ModelViewSet):
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
     )
+    filterset_class = ProjectFilter
 
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
@@ -131,6 +145,17 @@ class ProjectViewSet(ModelViewSet):
             return Response(serializer.data)
 
 
+# noinspection DuplicatedCode
+class EpicFilter(filters.FilterSet):
+    search = filters.CharFilter(field_name='name', lookup_expr='icontains')
+
+    class Meta:
+        model = Epic
+        fields = (
+            'project',
+        )
+
+
 class EpicViewSet(ModelViewSet):
     authentication_classes = (
         authentication.SessionAuthentication,
@@ -142,6 +167,18 @@ class EpicViewSet(ModelViewSet):
 
     queryset = Epic.objects.all()
     serializer_class = EpicSerializer
+    filterset_class = EpicFilter
+
+
+# noinspection DuplicatedCode
+class KanbanFilter(filters.FilterSet):
+    search = filters.CharFilter(field_name='name', lookup_expr='icontains')
+
+    class Meta:
+        model = Kanban
+        fields = (
+            'project',
+        )
 
 
 class KanbanViewSet(ModelViewSet):
@@ -155,6 +192,21 @@ class KanbanViewSet(ModelViewSet):
 
     queryset = Kanban.objects.all()
     serializer_class = KanbanSerializer
+    filterset_class = KanbanFilter
+
+
+class TaskFilter(filters.FilterSet):
+    search = filters.CharFilter(field_name='name', lookup_expr='icontains')
+    typeId = filters.NumberFilter(field_name='type_id', lookup_expr='exact')
+
+    class Meta:
+        model = Task
+        fields = (
+            'project',
+            'processor',
+            'epic',
+            'kanban',
+        )
 
 
 class TaskViewSet(ModelViewSet):
@@ -168,3 +220,4 @@ class TaskViewSet(ModelViewSet):
 
     queryset = Task.objects.select_related('project', 'project__person', 'epic', 'epic__project', 'kanban').all()
     serializer_class = TaskSerializer
+    filterset_class = TaskFilter
