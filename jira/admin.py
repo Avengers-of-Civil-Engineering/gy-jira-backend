@@ -15,13 +15,13 @@ class AppImageAdmin(admin.ModelAdmin):
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('id', 'name', 'person', 'organization', 'create_at')
 
 
 @admin.register(Kanban)
 class KanbanAdmin(admin.ModelAdmin):
     list_filter = ('project',)
-    list_display = ('project', 'name', 'rank', 'update_at')
+    list_display = ('id', 'name', 'rank', 'update_at')
 
 
 @admin.register(Epic)
@@ -32,9 +32,10 @@ class EpicAdmin(admin.ModelAdmin):
 @admin.register(ProjectUserSetting)
 class ProjectUserSettingAdmin(admin.ModelAdmin):
     list_filter = ('project', 'user')
-    list_display = ('project', 'user', 'is_pinned')
+    list_display = ('id', 'project', 'user', 'is_pinned')
 
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    list_filter = ('project',)
+    list_filter = ('project', 'kanban')
+    list_display = ('id', 'name', 'rank', 'update_at')
