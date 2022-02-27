@@ -1,5 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models import F, Max
+from django.db.models.functions import Greatest
 import uuid
 
 
@@ -71,15 +73,26 @@ class Epic(models.Model):
 class Kanban(models.Model):
     name = models.CharField(max_length=191)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='kanbans')
-    rank = models.IntegerField(verbose_name='排序参考值', default=0)
+    rank = models.FloatField(verbose_name='排序参考值', blank=True)
     create_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        if self.rank is None:
+            rank_max = Kanban.objects.aggregate(Max('rank'))['rank__max']
+            if rank_max is None:
+                self.rank = 1.0
+            else:
+                self.rank = rank_max + 100
+
+        super().save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         return self.name
 
     class Meta:
         verbose_name = verbose_name_plural = '看板'
+        ordering = ('rank',)
 
 
 class Task(models.Model):
@@ -90,12 +103,24 @@ class Task(models.Model):
     kanban = models.ForeignKey(Kanban, on_delete=models.SET_NULL, blank=True, null=True, related_name='tasks')
     type_id = models.IntegerField(verbose_name='类型ID')
     note = models.TextField(verbose_name='说明', blank=True, null=False)
+    rank = models.FloatField(verbose_name='排序参考值', blank=True)
 
     create_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        if self.rank is None:
+            rank_max = Task.objects.filter(kanban_id=self.kanban_id).aggregate(Max('rank'))['rank__max']
+            if rank_max is None:
+                self.rank = 1.0
+            else:
+                self.rank = rank_max + 100
+
+        super().save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         return self.name
 
     class Meta:
         verbose_name = verbose_name_plural = '任务'
+        ordering = ('kanban__rank', 'rank',)

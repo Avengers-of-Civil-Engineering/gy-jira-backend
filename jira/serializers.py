@@ -159,6 +159,7 @@ class KanbanSerializer(serializers.ModelSerializer):
         read_only_fields = (
             'id',
             'project_id',
+            'rank',
             'create_at',
             'update_at',
         )
@@ -191,6 +192,7 @@ class TaskSerializer(serializers.ModelSerializer):
             'kanban',
             'type_id',
             'note',
+            'rank',
             'create_at',
             'update_at',
         )
@@ -200,6 +202,118 @@ class TaskSerializer(serializers.ModelSerializer):
             'project',
             'epic',
             'kanban',
+            'rank',
             'create_at',
             'update_at',
         )
+
+
+"""
+export interface SortProps {
+  // 要重新排序的 item
+  fromId: number;
+  // 目标 item
+  referenceId: number;
+  // 放在目标 item 之前还是之后
+  type: "before" | "after";
+  fromKanbanId?: number;
+  toKanbanId?: number;
+}
+"""
+
+
+# noinspection PyAbstractClass
+class SortParamsSerializer(serializers.Serializer):
+    from_id = serializers.IntegerField(required=True, label='要重新排序的 itemID')
+    reference_id = serializers.IntegerField(required=False, label="目标itemID", allow_null=True, default=None)
+    type = serializers.ChoiceField(choices=(("before", "之前"), ("after", "之后")))
+
+    from_kanban_id = serializers.IntegerField(required=False, label="移动task时的源kanbanID", allow_null=True, default=None)
+    to_kanban_id = serializers.IntegerField(required=False, label="移动task时的目标kanbanID", allow_null=True, default=None)
+
+    def sort_kanban(self, validated_data):
+        from_id = validated_data['from_id']
+        reference_id = validated_data['reference_id']
+        type = validated_data['type']
+
+        if reference_id is None:
+            raise serializers.ValidationError({'msg': 'referenceId is required!'})
+
+        kanban_from = Kanban.objects.get(pk=from_id)
+
+        kanban_to = Kanban.objects.get(pk=reference_id)
+
+        if type == 'before':
+            hi = kanban_to.rank
+            kanban_to_before = Kanban.objects.filter(rank__lt=kanban_to.rank).first()
+            if kanban_to_before is None:
+                lo = hi - 100.0
+            else:
+                lo = kanban_to_before.rank
+            new_rank = float(lo + hi) / 2
+        elif type == 'after':
+            lo = kanban_to.rank
+            kanban_to_after = Kanban.objects.filter(rank__gt=kanban_to.rank).first()
+            if kanban_to_after is None:
+                hi = lo + 100.0
+            else:
+                hi = kanban_to_after.rank
+            new_rank = float(lo + hi) / 2
+        else:
+            raise serializers.ValidationError({'msg': 'type is invalid'})
+
+        kanban_from.rank = new_rank
+        kanban_from.save()
+
+        return kanban_from
+
+    def sort_task(self, validated_data):
+        from_id = validated_data['from_id']
+        reference_id = validated_data['reference_id']
+        type = validated_data['type']
+        from_kanban_id = validated_data['from_kanban_id']
+        to_kanban_id = validated_data['to_kanban_id']
+
+        if from_kanban_id is None or to_kanban_id is None:
+            raise serializers.ValidationError({'msg': 'fromKanbanId, toKanbanId is required!'})
+
+        try:
+            kanban_from = Kanban.objects.get(pk=from_kanban_id)
+        except Kanban.DoesNotExist:
+            raise serializers.ValidationError({'msg': 'fromKanbanId is invalid'})
+
+        try:
+            kanban_to = Kanban.objects.get(pk=reference_id)
+        except Kanban.DoesNotExist:
+            raise serializers.ValidationError({'msg': 'toKanbanId is invalid'})
+
+        task_from = Task.objects.get(pk=from_id)
+
+        if reference_id is None:
+            new_rank = 100
+        else:
+            task_to = Task.objects.get(pk=reference_id)
+            if type == 'before':
+                hi = task_to.rank
+                task_to_before = Task.objects.filter(rank__lt=task_to.rank, kanban=task_to.kanban).first()
+                if task_to_before is None:
+                    lo = hi - 100.0
+                else:
+                    lo = task_to_before.rank
+                new_rank = float(lo + hi) / 2
+            elif type == 'after':
+                lo = task_to.rank
+                task_to_after = Task.objects.filter(rank__gt=task_to.rank, kanban=task_to.kanban).first()
+                if task_to_after is None:
+                    hi = lo + 100.0
+                else:
+                    hi = task_to_after.rank
+                new_rank = float(lo + hi) / 2
+            else:
+                raise serializers.ValidationError({'msg': 'type is invalid'})
+
+        task_from.kanban = kanban_to
+        task_from.rank = new_rank
+        task_from.save()
+
+        return task_from
