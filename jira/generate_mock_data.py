@@ -21,8 +21,8 @@ def clear_data():
 
 
 def generate_mock_data():
-    user1 = User(username='aweffr', first_name='aweffr', email='', phone_number='1234567890')
-    user2 = User(username='guying', first_name='guying', email='', phone_number='1234567891')
+    user1 = User(username='aweffr', first_name='aweffr', email='', phone_number='1234567890', is_staff=True, is_superuser=True)
+    user2 = User(username='guying', first_name='guying', email='', phone_number='1234567891', is_staff=True, is_superuser=True)
 
     user1.set_password(MOCK_USER_PASS)
     user2.set_password(MOCK_USER_PASS)
