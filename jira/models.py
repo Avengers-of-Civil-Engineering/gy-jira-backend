@@ -1,8 +1,8 @@
+import uuid
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.db.models import F, Max
-from django.db.models.functions import Greatest
-import uuid
+from django.db.models import Max
 
 
 class AppImage(models.Model):
@@ -77,6 +77,7 @@ class Kanban(models.Model):
     create_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
 
+    # noinspection DuplicatedCode
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if self.rank is None:
             rank_max = Kanban.objects.aggregate(Max('rank'))['rank__max']
@@ -97,6 +98,7 @@ class Kanban(models.Model):
 
 class Task(models.Model):
     name = models.CharField(max_length=191, verbose_name='名称')
+    reporter = models.ForeignKey(User, verbose_name='报告人', blank=True, null=True, on_delete=models.SET_NULL, related_name='+')
     processor = models.ForeignKey(User, verbose_name='经办人', blank=True, null=True, on_delete=models.SET_NULL, related_name='tasks')
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='tasks')
     epic = models.ForeignKey(Epic, on_delete=models.SET_NULL, blank=True, null=True, related_name='tasks')
@@ -108,9 +110,10 @@ class Task(models.Model):
     create_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
 
+    # noinspection DuplicatedCode
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if self.rank is None:
-            rank_max = Task.objects.filter(kanban_id=self.kanban_id).aggregate(Max('rank'))['rank__max']
+            rank_max = Task.objects.aggregate(Max('rank'))['rank__max']
             if rank_max is None:
                 self.rank = 1.0
             else:

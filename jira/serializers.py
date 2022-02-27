@@ -1,4 +1,6 @@
 from rest_framework import serializers, exceptions
+from rest_framework.request import Request
+
 from .models import AppImage, User, Project, ProjectUserSetting, Epic, Kanban, Task
 
 
@@ -166,22 +168,35 @@ class KanbanSerializer(serializers.ModelSerializer):
 
 
 class TaskSerializer(serializers.ModelSerializer):
+    reporter = UserSerializer(read_only=True)
     processor = UserSerializer(read_only=True)
     project = ProjectSerializer(read_only=True)
     epic = EpicSerializer(read_only=True)
     kanban = KanbanSerializer(read_only=True)
 
+    reporter_id = serializers.IntegerField(label='报告人ID')
     project_id = serializers.IntegerField(label='项目ID')
     processor_id = serializers.IntegerField(label='经办人ID', required=False, allow_null=True)
     epic_id = serializers.IntegerField(label='史诗ID', required=False, allow_null=True)
     kanban_id = serializers.IntegerField(label='看板ID', required=False, allow_null=True)
     type_id = serializers.IntegerField(label="类型ID", default=1)
 
+    def create(self, validated_data):
+        task: Task = super().create(validated_data)
+        request: Request = self.context.get('request')
+
+        if request is not None and not request.user.is_anonymous:
+            task.reporter = request.user
+            task.save()
+
+        return task
+
     class Meta:
         model = Task
         fields = (
             'id',
             'name',
+            'reporter',
             'processor_id',
             'processor',
             'project_id',
@@ -198,6 +213,8 @@ class TaskSerializer(serializers.ModelSerializer):
         )
         read_only_fields = (
             'id',
+            'reporter',
+            'reporter_id',
             'processor',
             'project',
             'epic',
