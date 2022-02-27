@@ -1,7 +1,11 @@
+import logging
+
 from rest_framework import serializers, exceptions
 from rest_framework.request import Request
 
 from .models import AppImage, User, Project, ProjectUserSetting, Epic, Kanban, Task
+
+logger = logging.getLogger(__name__)
 
 
 class AppImageSerializer(serializers.ModelSerializer):
@@ -96,6 +100,12 @@ class ProjectSerializer(serializers.ModelSerializer):
             return None
         return project_user_setting.is_pinned
 
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if self.context.get('project_no_person'):
+            del ret['person']
+        return ret
+
     class Meta:
         model = Project
         fields = (
@@ -117,6 +127,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         )
 
 
+# noinspection PyAbstractClass
 class ProjectTogglePinSerializer(serializers.Serializer):
     new_val = serializers.BooleanField(label='是否收藏')
 
@@ -124,6 +135,12 @@ class ProjectTogglePinSerializer(serializers.Serializer):
 class EpicSerializer(serializers.ModelSerializer):
     project = ProjectSerializer(read_only=True)
     project_id = serializers.IntegerField(label='项目ID')
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if self.context.get('epic_no_project'):
+            del ret['project']
+        return ret
 
     class Meta:
         model = Epic
@@ -196,6 +213,7 @@ class TaskSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'name',
+            'reporter_id',
             'reporter',
             'processor_id',
             'processor',
@@ -223,20 +241,6 @@ class TaskSerializer(serializers.ModelSerializer):
             'create_at',
             'update_at',
         )
-
-
-"""
-export interface SortProps {
-  // 要重新排序的 item
-  fromId: number;
-  // 目标 item
-  referenceId: number;
-  // 放在目标 item 之前还是之后
-  type: "before" | "after";
-  fromKanbanId?: number;
-  toKanbanId?: number;
-}
-"""
 
 
 # noinspection PyAbstractClass
@@ -297,12 +301,12 @@ class SortParamsSerializer(serializers.Serializer):
         try:
             kanban_from = Kanban.objects.get(pk=from_kanban_id)
         except Kanban.DoesNotExist:
-            raise serializers.ValidationError({'msg': 'fromKanbanId is invalid'})
+            raise serializers.ValidationError({'msg': f'fromKanbanId is invalid, fromKanbanId={from_kanban_id}'})
 
         try:
-            kanban_to = Kanban.objects.get(pk=reference_id)
+            kanban_to = Kanban.objects.get(pk=to_kanban_id)
         except Kanban.DoesNotExist:
-            raise serializers.ValidationError({'msg': 'toKanbanId is invalid'})
+            raise serializers.ValidationError({'msg': f'toKanbanId is invalid, toKanbanId={to_kanban_id}'})
 
         task_from = Task.objects.get(pk=from_id)
 

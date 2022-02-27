@@ -22,7 +22,7 @@ from .serializers import (
     ProjectSerializer,
     EpicSerializer,
     KanbanSerializer,
-    TaskSerializer, ProjectTogglePinSerializer
+    TaskSerializer, ProjectTogglePinSerializer, SortParamsSerializer
 )
 
 
@@ -194,6 +194,18 @@ class KanbanViewSet(ModelViewSet):
     serializer_class = KanbanSerializer
     filterset_class = KanbanFilter
 
+    def get_serializer_class(self):
+        if self.action == 'reorder':
+            return SortParamsSerializer
+        return super().get_serializer_class()
+
+    @action(methods=['POST', ], detail=False)
+    def reorder(self, request: Request):
+        serializer: SortParamsSerializer = self.get_serializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.sort_kanban(serializer.validated_data)
+            return Response({'msg': 'sort kanbans finish!', 'sortParams': serializer.validated_data})
+
 
 class TaskFilter(filters.FilterSet):
     search = filters.CharFilter(field_name='name', lookup_expr='icontains')
@@ -221,3 +233,21 @@ class TaskViewSet(ModelViewSet):
     queryset = Task.objects.select_related('project', 'project__person', 'epic', 'epic__project', 'kanban').all()
     serializer_class = TaskSerializer
     filterset_class = TaskFilter
+
+    def get_serializer_context(self):
+        ctx = super().get_serializer_context()
+        ctx['epic_no_project'] = True
+        ctx['project_no_person'] = True
+        return ctx
+
+    def get_serializer_class(self):
+        if self.action == 'reorder':
+            return SortParamsSerializer
+        return super().get_serializer_class()
+
+    @action(methods=['POST', ], detail=False)
+    def reorder(self, request: Request):
+        serializer: SortParamsSerializer = self.get_serializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.sort_task(serializer.validated_data)
+            return Response({'msg': 'sort tasks finish!', 'sortParams': serializer.validated_data})
