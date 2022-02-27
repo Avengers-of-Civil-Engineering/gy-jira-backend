@@ -12,6 +12,14 @@ tz_shanghai = tz.gettz('Asia/Shanghai')
 MOCK_USER_PASS = os.environ.get('MOCK_USER_PASS', 'thisisunsafe')
 
 
+def clear_data():
+    User.objects.all().delete()
+    Project.objects.all().delete()
+    Kanban.objects.all().delete()
+    Epic.objects.all().delete()
+    Task.objects.all().delete()
+
+
 def generate_mock_data():
     user1 = User(username='aweffr', first_name='aweffr', email='', phone_number='1234567890')
     user2 = User(username='guying', first_name='guying', email='', phone_number='1234567891')
