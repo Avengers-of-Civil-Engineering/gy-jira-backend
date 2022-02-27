@@ -92,13 +92,15 @@ class MyObtainAuthTokenAPI(ObtainAuthToken):
 
 
 class ProjectFilter(filters.FilterSet):
+    name = filters.CharFilter(label='按名称搜索', field_name='name', lookup_expr='icontains')
+    personId = filters.NumberFilter(field_name='person_id', lookup_expr='exact')
+
     createAtMin = filters.DateTimeFilter(field_name='create_at', lookup_expr='gte')
     createAtMax = filters.DateTimeFilter(field_name='create_at', lookup_expr='lte')
 
     class Meta:
         model = Project
         fields = (
-            'person',
             'organization',
         )
 
@@ -147,13 +149,12 @@ class ProjectViewSet(ModelViewSet):
 
 # noinspection DuplicatedCode
 class EpicFilter(filters.FilterSet):
-    search = filters.CharFilter(field_name='name', lookup_expr='icontains')
+    name = filters.CharFilter(field_name='name', lookup_expr='icontains')
+    projectId = filters.NumberFilter(label='项目ID', field_name='project_id', lookup_expr='exact')
 
     class Meta:
         model = Epic
-        fields = (
-            'project',
-        )
+        fields = ()
 
 
 class EpicViewSet(ModelViewSet):
@@ -172,13 +173,12 @@ class EpicViewSet(ModelViewSet):
 
 # noinspection DuplicatedCode
 class KanbanFilter(filters.FilterSet):
-    search = filters.CharFilter(field_name='name', lookup_expr='icontains')
+    name = filters.CharFilter(field_name='name', lookup_expr='icontains')
+    projectId = filters.NumberFilter(label='项目ID', field_name='project_id', lookup_expr='exact')
 
     class Meta:
         model = Kanban
-        fields = (
-            'project',
-        )
+        fields = ()
 
 
 class KanbanViewSet(ModelViewSet):
@@ -208,17 +208,16 @@ class KanbanViewSet(ModelViewSet):
 
 
 class TaskFilter(filters.FilterSet):
-    search = filters.CharFilter(field_name='name', lookup_expr='icontains')
+    name = filters.CharFilter(field_name='name', lookup_expr='icontains')
     typeId = filters.NumberFilter(field_name='type_id', lookup_expr='exact')
+    projectId = filters.NumberFilter(label='项目ID', field_name='project_id', lookup_expr='exact')
+    processorId = filters.NumberFilter(label='经办人ID', field_name='processor_id', lookup_expr='exact')
+    epicId = filters.NumberFilter(label='任务组ID', field_name='epic_id', lookup_expr='exact')
+    kanbanId = filters.NumberFilter(label='看板ID', field_name='kanban_id', lookup_expr='exact')
 
     class Meta:
         model = Task
-        fields = (
-            'project',
-            'processor',
-            'epic',
-            'kanban',
-        )
+        fields = ()
 
 
 class TaskViewSet(ModelViewSet):
