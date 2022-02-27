@@ -38,4 +38,4 @@ class ProjectUserSettingAdmin(admin.ModelAdmin):
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
     list_filter = ('project', 'kanban')
-    list_display = ('id', 'name', 'rank', 'update_at')
+    list_display = ('id', 'kanban', 'name', 'rank', 'update_at')
