@@ -191,7 +191,7 @@ class TaskSerializer(serializers.ModelSerializer):
     epic = EpicSerializer(read_only=True)
     kanban = KanbanSerializer(read_only=True)
 
-    reporter_id = serializers.IntegerField(label='报告人ID')
+    reporter_id = serializers.IntegerField(label='报告人ID', required=False, allow_null=True)
     project_id = serializers.IntegerField(label='项目ID')
     processor_id = serializers.IntegerField(label='经办人ID', required=False, allow_null=True)
     epic_id = serializers.IntegerField(label='史诗ID', required=False, allow_null=True)
@@ -232,7 +232,6 @@ class TaskSerializer(serializers.ModelSerializer):
         read_only_fields = (
             'id',
             'reporter',
-            'reporter_id',
             'processor',
             'project',
             'epic',
