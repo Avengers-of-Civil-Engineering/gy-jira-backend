@@ -10,6 +10,8 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from django_filters import rest_framework as filters
 
+from .authentication import MySessionAuthentication
+
 from .models import (
     User,
     AppImage,
@@ -36,7 +38,7 @@ class AllowPostByAnyOne(permissions.BasePermission):
 
 class UserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, GenericViewSet):
     authentication_classes = (
-        authentication.SessionAuthentication,
+        MySessionAuthentication,
         authentication.TokenAuthentication,
     )
     permission_classes = (
@@ -67,7 +69,7 @@ class UserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.Creat
 
 class AppImageViewSet(mixins.RetrieveModelMixin, mixins.CreateModelMixin, GenericViewSet):
     authentication_classes = (
-        authentication.SessionAuthentication,
+        MySessionAuthentication,
         authentication.TokenAuthentication,
     )
     permission_classes = (
@@ -107,7 +109,7 @@ class ProjectFilter(filters.FilterSet):
 
 class ProjectViewSet(ModelViewSet):
     authentication_classes = (
-        authentication.SessionAuthentication,
+        MySessionAuthentication,
         authentication.TokenAuthentication,
     )
     permission_classes = (
@@ -159,7 +161,7 @@ class EpicFilter(filters.FilterSet):
 
 class EpicViewSet(ModelViewSet):
     authentication_classes = (
-        authentication.SessionAuthentication,
+        MySessionAuthentication,
         authentication.TokenAuthentication,
     )
     permission_classes = (
@@ -183,7 +185,7 @@ class KanbanFilter(filters.FilterSet):
 
 class KanbanViewSet(ModelViewSet):
     authentication_classes = (
-        authentication.SessionAuthentication,
+        MySessionAuthentication,
         authentication.TokenAuthentication,
     )
     permission_classes = (
@@ -222,7 +224,7 @@ class TaskFilter(filters.FilterSet):
 
 class TaskViewSet(ModelViewSet):
     authentication_classes = (
-        authentication.SessionAuthentication,
+        MySessionAuthentication,
         authentication.TokenAuthentication,
     )
     permission_classes = (
