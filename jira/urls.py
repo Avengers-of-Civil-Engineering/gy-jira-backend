@@ -1,5 +1,6 @@
 from pprint import pprint
 from django.urls import include, path
+from django.views.decorators.csrf import csrf_exempt
 
 from rest_framework import routers
 from . import views
@@ -16,6 +17,6 @@ pprint(router.get_urls())
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('api-token-auth/', views.MyObtainAuthTokenAPI.as_view(), name="token_login"),
+    path('api-token-auth/', csrf_exempt(views.MyObtainAuthTokenAPI.as_view()), name="token_login"),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
