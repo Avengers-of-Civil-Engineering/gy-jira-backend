@@ -7,8 +7,8 @@ services:
     volumes:
       - './jira_backend/.env:/app/gy-jira-backend/jira_backend/.env:ro'
       - './logs:/app/gy-jira-backend/logs'
-      - './media:/app/gy-jira-backend/media'
-      - './static:/app/gy-jira-backend/static'
+      - './api/media:/app/gy-jira-backend/api/media'
+      - './api/static:/app/gy-jira-backend/api/static'
     ports:
       - '8000:8000'
 

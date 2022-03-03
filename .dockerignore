@@ -279,3 +279,6 @@ fabric.properties
 
 # End of https://www.toptal.com/developers/gitignore/api/pycharm,django
 /jira_backend/*.env
+
+/api/static/
+/api/media/

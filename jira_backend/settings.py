@@ -97,11 +97,11 @@ SESSION_COOKIE_NAME = "gy_jira_sessionid"
 
 AUTH_USER_MODEL = "jira.User"
 
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / "static"
+STATIC_URL = '/api/static/'
+STATIC_ROOT = BASE_DIR / "api" / "static"
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_URL = '/api/media/'
+MEDIA_ROOT = BASE_DIR / "api" / "media"
 
 REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
